@@ -58,7 +58,7 @@ def console_mode():
     for count, arg in enumerate(arguments):
         # full name or short name of arguments
         if arg == '-a':
-            time_note = str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S'))
+            # time_note = str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S'))
             for _arg in arguments:
                 if _arg == '-t' or _arg == '--title':
                     note_title = arg_dict[_arg]
@@ -112,7 +112,7 @@ def console_mode():
             console_help()
 
         elif arg == '-g' or arg == '--gui':
-            gui_mode(data, last_val)
+            gui_mode()
 
         else:
             console_help()
@@ -123,7 +123,6 @@ def arg_parser(args):
     args_dict = {}
 
     # change all arguments name to short name
-    z = ''
     for count, arg in enumerate(args):
         if arg.startswith('-'):
             z = re.search("^--\w+", arg)
@@ -161,7 +160,7 @@ def note_add(*args, verbose=True):
     # 1 - message
     # 2 - id
     # 3 - json data
-    data: dict = {}
+
     data_to_json = {}
     try:
         data = args[3]
@@ -174,13 +173,13 @@ def note_add(*args, verbose=True):
                                       "title": str(args[0]),
                                       "msg": str(args[1])}}
             save_json_file(data_to_json)
-        else:
-            data_to_json = {"id": str(args[2]),
-                            "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
-                            "title": str(args[0]),
-                            "msg": str(args[1])}
-            data[args[2]] = data_to_json
-            save_json_file(data)
+        # else:
+        #     data_to_json = {"id": str(args[2]),
+        #                     "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
+        #                     "title": str(args[0]),
+        #                     "msg": str(args[1])}
+        #     data[args[2]] = data_to_json
+        #     save_json_file(data)
     else:
         data_to_json = {"id": str(args[2]),
                         "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
@@ -227,6 +226,158 @@ def clear_screen():
     # for mac and linux(here, os.name is 'posix')
     else:
         _ = system('clear')
+
+
+def init_gui():
+    clear_screen()
+    sys.stdout.flush()
+    print('Welcome to Manual mode', file=sys.stdout, flush=False)
+    print('Please type \'help\' for instructions or CTRL+Z for exit')
+    print('--------------------------------------------------------')
+    print('                     NOTE EDITOR v.1.0                  ')
+    print('                      List of commands                  ')
+    print('                                                        ')
+    print('--------------------------------------------------------')
+    print('1) add note')
+    print('2) change note')
+    print('3) delete note')
+    print('4) view all notes')
+    print('5) view last note')
+    print('0) exit from application')
+    print('--------------------------------------------------------')
+    cmd = input("Enter command:").strip().lower()
+    return cmd
+
+
+def gui_mode():
+    clear_screen()
+    sys.stdout.flush()
+
+    while True:
+        try:
+            data = read_json_file()
+            # arg_dict = arg_parser(sys.argv)
+            try:
+                last_val = max(list(map(int, data.keys()))) + 1
+            except ValueError:
+                last_val = 0
+
+            cmd = init_gui()
+            if cmd == 'выход' or cmd == 'exit' or cmd == '0':
+                sys_exit()
+
+            elif cmd == "view all" or cmd == '4':
+                clear_screen()
+                if len(data.values()) == 0:
+                    print('no notes added yet...')
+                else:
+                    for note in data.values():
+                        print(note, end='\n')
+                input("press any key to continue...")
+
+            elif cmd == "view last" or cmd == '5':
+                clear_screen()
+                if len(data.values()) == 0:
+                    print('no notes added yet...')
+                else:
+                    print(data[f'{last_val - 1}'])
+                input("press any key to continue...")
+
+            elif cmd == "add note" or cmd == '1':
+                title = input('Введите название заголовка: ')
+                message = input('Введите заметку: ')
+                note_add(title, message, last_val, verbose=True)
+
+            elif cmd == "change note" or cmd == '2':
+
+                while True:
+                    for i in data.values():
+                        print(i)
+                    note_id = input('Введите id заметки: ')
+
+                    try:
+                        data_note = data[note_id]
+
+                    except KeyError:
+                        print('Заметки с указанным id нет')
+                        time.sleep(1)
+                    else:
+                        title = data_note['title']
+                        message = data_note['msg']
+                        last_val = data_note['id']
+                        title_input = input('Введите новое название заголовка (enter - пропустить): ')
+
+                        if len(title_input) > 0:
+                            title = title_input
+
+                        time.sleep(0.1)
+
+                        message_input = input('Отредактируйте содержание заметки (enter - пропустить): ')
+
+                        if len(message_input) > 0:
+                            message = message_input
+
+                        time.sleep(0.1)
+                        note_add(title, message, last_val, verbose=False)
+                        print('Заметка отредактирована')
+                        break
+
+            elif cmd == "delete note" or cmd == '3':
+                if len(data.values()) == 0:
+                    print('no notes added yet...')
+                    input("press any key to continue...")
+                else:
+                    for i in data.values():
+                        print(i)
+                    while True:
+                        note_id = input('Enter id to delete (enter: go to main menu): ')
+
+                        try:
+                            data_note = data[note_id]
+
+                        except KeyError:
+                            if len(note_id) == 0:
+                                break
+                            else:
+                                print(len(note_id))
+                                print('Заметки с указанным id нет')
+                            time.sleep(1)
+                        else:
+                            data.pop(data_note['id'])
+                            save_json_file(data)
+                            print(f'Note with id={note_id} was deleted')
+                            input("Press any key to continue...")
+                            break
+
+            elif cmd == 'help':
+                dialog_help()
+
+            else:
+                print("Команда не распознана")
+                time.sleep(1)
+        except (EOFError, KeyboardInterrupt):
+            sys_exit()
+
+
+def sys_exit():
+    print('Exit...')
+    sys.exit()
+
+
+def dialog_help():
+    clear_screen()
+    print('-------------------------------------------------')
+    print('                     HELP                        ')
+    print('                 List of commands                ')
+    print('-------------------------------------------------')
+    print('1) add note')
+    print('2) change note:')
+    print('3) delete note:')
+    print('4) view all notes:')
+    print('5) view last note:')
+    print('0) exit from application:')
+    print('-------------------------------------------------')
+    input("\n\npress Enter to continue...")
 
 
 # Press the green button in the gutter to run the script.
