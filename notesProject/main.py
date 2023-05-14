@@ -1,6 +1,42 @@
+import json
 import sys
 from os import system, name
 import re
+
+
+def save_json_file(data):
+    with open('task_note.json', 'w') as json_data:
+        json.dump(data, json_data)
+
+
+def open_file():
+    new_file_flag = False
+    try:
+        # read file
+        open('task_note.json', 'r')
+    except FileNotFoundError:
+        # exception
+        print('file not found...')
+        print('attempt to create it...')
+        f = open('task_note.json', "x")
+        f.write('')
+        f.close()
+        new_file_flag = True
+    finally:
+        return new_file_flag
+
+
+def read_json_file():
+    if open_file():
+        print('file created')
+        return {}
+    else:
+        with open('task_note.json', 'r') as raw_file_data:
+            try:
+                json_data = json.load(raw_file_data)
+            except json.decoder.JSONDecodeError:
+                json_data = {}
+            return json_data
 
 
 def console_mode():
