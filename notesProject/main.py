@@ -1,3 +1,5 @@
+from datetime import time, datetime
+import time
 import json
 import sys
 from os import system, name
@@ -151,6 +153,46 @@ def arg_parser(args):
             args_dict["-h"] = ""
 
     return args_dict
+
+
+def note_add(*args, verbose=True):
+    # print(args)
+    # 0 - title
+    # 1 - message
+    # 2 - id
+    # 3 - json data
+    data: dict = {}
+    data_to_json = {}
+    try:
+        data = args[3]
+
+    except IndexError:
+        data = read_json_file()
+        if len(list(data.keys())) == 0:
+            data_to_json = {args[2]: {"id": str(args[2]),
+                                      "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
+                                      "title": str(args[0]),
+                                      "msg": str(args[1])}}
+            save_json_file(data_to_json)
+        else:
+            data_to_json = {"id": str(args[2]),
+                            "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
+                            "title": str(args[0]),
+                            "msg": str(args[1])}
+            data[args[2]] = data_to_json
+            save_json_file(data)
+    else:
+        data_to_json = {"id": str(args[2]),
+                        "time": str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S')),
+                        "title": str(args[0]),
+                        "msg": str(args[1])}
+        data[args[2]] = data_to_json
+        save_json_file(data)
+
+    finally:
+        if verbose:
+            print(data_to_json)
+            input("Press any key to continue...")
 
 
 def console_help():
