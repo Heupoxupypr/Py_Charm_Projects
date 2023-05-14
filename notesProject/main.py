@@ -1,4 +1,6 @@
 import sys
+from os import system, name
+
 
 def console_mode():
     note_title = ''
@@ -98,6 +100,15 @@ def console_help():
     print('python notes.py --view all   выведет все существующие заметки на экран')
     print('python notes.py --delete 5   удалит заметку, id которой равен 5')
     print("\n")
+
+def clear_screen():
+    # for windows
+    if name == 'nt':
+        _ = system('cls')
+
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
