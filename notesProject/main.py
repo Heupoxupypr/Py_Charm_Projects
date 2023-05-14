@@ -76,6 +76,29 @@ def console_mode():
         else:
             console_help()
 
+def console_help():
+    clear_screen()
+    print('Console mode')
+    print('Использование: --команда (-короткое написание) значение команды')
+    print('Синтаксиc')
+    print('Основные команды:')
+    print("ADD (--add, -a)                  добавить заметку (с необязательным значением 'note')")
+    print("CHANGE (--change, -c)            редактировать запись с заданным id")
+    print("DELETE (--delete, -d)            удалить запись по её id")
+    print("GUI (--gui, -g)                  переводит работу программы в графический режим")
+    print("HELP (--help, -h)                вывести справку")
+    print("VIEW (--view, -v) [all, last]    посмотреть все (последнюю) записи")
+    print('Необязательные ключи:')
+    print("--title, -t                      заголовок заметки")
+    print("--message, -m                    тело заметки")
+
+    print('[Пример]:')
+    print('python notes.py -a note -t "Заголовок заметки" -m "Тело заметки"\tсоздаст заметку '
+          'с заголовком "Заголовок заметки" и записью "Тело заметки"')
+    print('python notes.py --view all   выведет все существующие заметки на экран')
+    print('python notes.py --delete 5   удалит заметку, id которой равен 5')
+    print("\n")
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     if len(sys.argv) > 1:
