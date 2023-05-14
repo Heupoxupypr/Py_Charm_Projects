@@ -1,5 +1,6 @@
 import sys
 from os import system, name
+import re
 
 
 def console_mode():
@@ -15,9 +16,9 @@ def console_mode():
     except ValueError:
         last_val = 0
 
-    # парсим аргументы и их значения
+    # parse arguments and data
     for count, arg in enumerate(arguments):
-        # учитываем полные и сокращенные имена аргументов
+        # full name or short name of arguments
         if arg == '-a':
             time_note = str(datetime.now().strftime('%d.%m.%Y - %H:%M:%S'))
             for _arg in arguments:
@@ -78,6 +79,44 @@ def console_mode():
         else:
             console_help()
 
+
+def arg_parser(args):
+    args.pop(0)
+    args_dict = {}
+
+    # change all arguments name to short name
+    z = ''
+    for count, arg in enumerate(args):
+        if arg.startswith('-'):
+            z = re.search("^--\w+", arg)
+            if z:
+                # print(z.group()[1:3])
+                try:
+                    args_dict[z.group()[1:3]] = args[count + 1]
+                except IndexError:
+                    args_dict[z.group()[1:3]] = ""
+                    # pass
+            else:
+                try:
+                    args_dict[arg] = args[count + 1]
+                except IndexError:
+                    args_dict[arg] = ''
+        elif arg == 'ADD':
+            args_dict["-a"] = ''
+        elif arg == "CHANGE":
+            args_dict["-c"] = args[count + 1]
+        elif arg == "DELETE":
+            args_dict["-d"] = args[count + 1]
+        elif arg == "VIEW":
+            args_dict["-v"] = args[count + 1]
+        elif arg == "GUI":
+            args_dict["-g"] = ""
+        elif arg == 'HELP':
+            args_dict["-h"] = ""
+
+    return args_dict
+
+
 def console_help():
     clear_screen()
     print('Console mode')
@@ -101,6 +140,7 @@ def console_help():
     print('python notes.py --delete 5   удалит заметку, id которой равен 5')
     print("\n")
 
+
 def clear_screen():
     # for windows
     if name == 'nt':
@@ -109,6 +149,7 @@ def clear_screen():
     # for mac and linux(here, os.name is 'posix')
     else:
         _ = system('clear')
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
